@@ -1,3 +1,11 @@
- dependencies {
-      compile 'org.mongodb:mongo-java-driver:3.0.4'
-  }
+apply plugin: 'java'
+apply plugin: 'application'
+
+mainClassName = 'net.neverclear.ccdb.Test'
+
+repositories {
+    mavenCentral()
+}
+dependencies {
+	compile 'org.mongodb:mongodb-driver:3.4.2'
+}
