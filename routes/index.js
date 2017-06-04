@@ -3,9 +3,7 @@ var router = express.Router();
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Express' });
-  // res.send("jfioeaj@feija");
-  // res.json({"foo": "bar", "hoge": "hujkhlu"});
+  res.render('index', { title: 'CCDB' });
 });
 
 module.exports = router;
