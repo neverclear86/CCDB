@@ -2,7 +2,9 @@
 CompureCraftから扱えるデータベースとそのためのAPIだよ
 
 ## 環境
-- Java 1.8
+- JavaScript
+  - Node.js
+    - express
 - MongoDB
 - CCLua (Lua5.1相当)
 
