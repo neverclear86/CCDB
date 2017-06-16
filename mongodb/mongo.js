@@ -1,5 +1,19 @@
-class Mongo {
+mongo = {};
+
+mongo.createUser() {
+  
+}
+
+mongo.authUser = function() {
 
 }
+
+mongo.removeUser = function() {
+
+}
+
+//==================================
+
+
 
 module.export = Mongo;
