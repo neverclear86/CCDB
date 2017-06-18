@@ -1,7 +1,7 @@
-const gulp = require('gulp');
-const spawn = require('child_process').spawn;
-const livereload = require('gulp-livereload');
-var server;
+var gulp = require('gulp'),
+spawn = require('child_process').spawn,
+livereload = require('gulp-livereload'),
+server;
 
 gulp.task('server',function(){
     if(server){
@@ -21,12 +21,13 @@ gulp.task('server',function(){
      server.stderr.on('data',function(data){
          console.log(data);
      });
-})
+});
+
 //livereloadサーバへ変更通知を行い、ブラウザのリロードを行う。
 gulp.task('reload',function(){
      gulp.src(['public/*/*','views/*'])
              .pipe(livereload());
-})
+});
 
 gulp.task('watch',['server'],function(){
         livereload.listen();
@@ -34,4 +35,6 @@ gulp.task('watch',['server'],function(){
         gulp.watch(['js/*.js','app.js','routes/*'],['server']);
         //ブラウザリロードの対象にするファイル
         gulp.watch(['public/*/*','views/*'],['reload']);
-})
+});
+
+gulp.task('default', ['server', 'watch']);
