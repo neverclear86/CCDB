@@ -31,7 +31,7 @@ app.use('/', require("./routes/index"));
 var files = fs.readdirSync("./routes");
 for (var i = 0, l = files.length; i < l; i++) {
   var file = files[i].substr(0, files[i].indexOf(".js"));
-  app.use("/" + file, require("./routes/" + file));
+  app.use("/api/" + file, require("./routes/" + file));
 }
 
 
