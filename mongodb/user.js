@@ -5,13 +5,15 @@ var url = "mongodb://localhost:27017/testuser"
 
 var user = {};
 user.create = function(data) {
-  client.connect(url, (err, db) => {
-    var col = db.collection('user');
-    col.insert(data, (err, result) => {
-      assert.equal(null, err);
-      db.close();
+  return new Promise((resolve, reject) => {
+    client.connect(url, (err, db) => {
+      var col = db.collection('user');
+      col.insert(data, (err, result) => {
+        assert.equal(null, err);
+        db.close();
+        resolve(result);
+      });
     });
-
   });
 }
 
