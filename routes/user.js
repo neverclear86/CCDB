@@ -33,11 +33,10 @@ router.post('/', (req, res, next) => {
     name: req.body.name,
     password: req.body.password,
   };
-  user.create(data);
-  // .then((result) => {
-  //   res.json({result: result});
-  // });
-  res.json({result:true});
+  user.create(data)
+  .then((result) => {
+    res.json({result: result});
+  });
 });
 
 module.exports = router;
