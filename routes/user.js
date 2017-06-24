@@ -1,6 +1,6 @@
 /**
- *  /api/user
- *  DBを利用するユーザについての操作
+ *  @file /api/user
+ *  DBを扱うユーザの認証
  *  @author neverclear
  */
 
@@ -9,34 +9,18 @@ var express = require('express');
 var router = express.Router();
 var user = require('../mongodb/user');
 
-/**
- *  GET
- *  Find user.
- */
 router.get('/', (req, res, next) => {
-  user.find({
+  user.auth({
     name: req.query.name,
-  }).then((data) => {
-    console.log(data.length);
+    password: req.query.password,
+  }).then((result) => {
+    console.log(result);
+
     res.json({
-      result: data.length > 0,
+      result: result,
     });
   });
 });
 
-/**
- *  POST
- *  Insert user.
- */
-router.post('/', (req, res, next) => {
-  var data = {
-    name: req.body.name,
-    password: req.body.password,
-  };
-  user.create(data)
-  .then((result) => {
-    res.json({result: result});
-  });
-});
 
 module.exports = router;
