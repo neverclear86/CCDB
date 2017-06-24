@@ -13,11 +13,10 @@ var dao = {};
 
 /**
  * [description]
- * @param  {[type]} data       [description]
- * @param  {[type]} collection [description]
- * @param  {[type]} user       [description]
- * @param  {[type]} pass       [description]
- * @return {[type]}            [description]
+ * @param  {Object} data       [description]
+ * @param  {String} collection [description]
+ * @param  {String} user       [description]
+ * @return {Promise}           [description]
  */
 dao.insert = function(data, collection, user) {
   return new Promise((resolve, reject) => {
