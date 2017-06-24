@@ -20,7 +20,7 @@ user.insert = function(data) {
   return new Promise((resolve, reject) => {
     client.connect(url, (err, db) => {
       var col = db.collection('user');
-      col.insert(data, (err, result) => {
+      col.insertOne(data, (err, result) => {
         assert.equal(null, err);
         db.close();
         resolve(result);
