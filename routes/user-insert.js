@@ -16,8 +16,8 @@ router.post('/', (req, res, next) => {
   };
   // 同じユーザ名が存在するかを確認
   user.find({name:req.body.name})
-  .then((data) => {
-    if (data.length == 0) {
+  .then((r) => {
+    if (r.length == 0) {
       // 大丈夫そうなら追加
       user.insert(data)
       .then((result) => {

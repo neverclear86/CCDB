@@ -14,8 +14,6 @@ router.get('/', (req, res, next) => {
     name: req.query.name,
     password: req.query.password,
   }).then((result) => {
-    console.log(result);
-
     res.json({
       result: result,
     });
