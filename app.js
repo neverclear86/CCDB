@@ -27,19 +27,11 @@ app.use(express.static(path.join(__dirname, 'public')));
 // index設定
 app.use('/', require("./routes/index"));
 
-// 全ファイルのルーティング
-// require('./util/dir-walk')('./routes', function(filePath) {
-//   filePath = './' + filePath.replace('\\', '/');
-//   var file = path.basename(filePath, '.js');
-//   // console.log(filePath);
-//   app.use('/' + file, require(filePath.substr(0, filePath.indexOf(".js"))));
-// });
 var files = fs.readdirSync("./routes");
 for (var i = 0, l = files.length; i < l; i++) {
   var file = files[i].substr(0, files[i].indexOf(".js"));
   app.use("/api/" + file, require("./routes/" + file));
 }
-// console.log(app.routes);
 
 
 
