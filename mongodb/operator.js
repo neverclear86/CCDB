@@ -43,11 +43,41 @@ dao.find = function(query, collection, user) {
       col.find(query).toArray().then((docs) => {
         db.close();
         resolve(docs);
+      }).catch((err) => {
+        reject(err);
       });
-    }).catch((err) => {
-      db.close();
-      reject(err);
-    })
+    });
+  });
+}
+
+dao.update = function(selector, docs, collection, user) {
+  return new Promise((resolve, reject) => {
+    var url = baseUrl + user;
+    client.connect(url, (err, db) => {
+      var col = db.collection(collection);
+      col.updateMany(selector, docs).then((r) => {
+        db.close();
+        resolve(r);
+      }).catch((err) => {
+        reject(err);
+      });
+    });
+  });
+}
+
+
+dao.delete = function(filter, collection, user) {
+  return new Promise((resolve, reject) => {
+    var url = baseUrl + user;
+    client.connect(url, (err, db) => {
+      var col = db.collection(collection);
+      col.deleteMany(filter).then((r) => {
+        db.close();
+        resolve(r);
+      }).catch((err) => {
+        reject(err);
+      });
+    });
   });
 }
 
