@@ -33,21 +33,18 @@ router.post('/insert/', (req, res, next) => {
           if (result) {
             res.json(resBuilder.success(result));
           } else {
-            res.json(resBuilder.error());
+            throw new Error('What the fuck')
           }
         });
       } catch (err) {
-        if (err instanceof SyntaxError) {
-          res.json(resBuilder.error("JSON SyntaxError"));
-        } else {
-          res.json(resBuilder.error("Error..."));
-        }
+        throw err;
       }
     } else {
       // 認証失敗
+      throw new Error('Login Error');
     }
   }).catch((err) => {
-    res.json(err);
+    res.json(resBuilder.error(err.message));
   });
 });
 
@@ -60,23 +57,29 @@ router.post('/find/', (req, res, next) => {
       var query = req.body.query;
       try {
         if (!query) {
-          query = '{}';
+          query = {};
+        } else {
+          query = JSON.parse(query);
         }
-        dao.find(JSON.parse(query), req.body.collection, req.body.name)
+        dao.find(query, req.body.collection, req.body.name)
         .then((result) => {
+          if (result.length) {
             res.json(resBuilder.success(result));
+          } else {
+            throw new Error('No Data');
+          }
         }).catch((err) => {
-          throw err;
+          res.json(resBuilder.error(err.message));
         });
       } catch (err) {
-        console.log(err);
-        res.json({err: err.message});
+        throw err;
       }
     } else {
       // 認証失敗
+      throw new Error("Login Error");
     }
   }).catch((err) => {
-    res.json(err);
+    res.json(resBuilder.error(err.message));
   });
 });
 
@@ -92,19 +95,19 @@ router.post('/update/', (req, res, next) => {
         var data = JSON.parse(req.body.data);
         dao.update(selector, data, req.body.collection, req.body.name)
         .then((result) => {
-          res.json(result);
+          res.json(resBuilder.success(result));
         }).catch((err) => {
-          console.log(err);
-          res.json(err);
+          res.json(resBuilder.error(err.message));
         });
       } catch (err) {
-        res.json(err);
+        throw err;
       }
     } else {
       // 認証失敗
+      throw new Error("Login Error");
     }
   }).catch((err) => {
-    res.json(err);
+    res.json(resBuilder.error(err.message));
   });
 });
 
@@ -119,19 +122,19 @@ router.post('/delete/', (req, res, next) => {
         var filter = JSON.parse(req.body.filter);
         dao.delete(filter, req.body.collection, req.body.name)
         .then((result) => {
-            res.json(result);
+            res.json(resBuilder.success(result));
         }).catch((err) => {
-          throw err;
+          res.json(resBuilder.error(err.message));
         });
       } catch (err) {
-        console.log(err);
-        res.json(err);
+        throw err;
       }
     } else {
       // 認証失敗
+      throw new Error('Login Error');
     }
   }).catch((err) => {
-    res.json(err);
+    res.json(resBuilder.error(err.message));
   });
 });
 
