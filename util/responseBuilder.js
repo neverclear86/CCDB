@@ -15,7 +15,10 @@ responseBuilder.success = function(data) {
 responseBuilder.error = function(err) {
   return {
     result: false,
-    detail: err,
+    detail: {
+      name: err.name,
+      message: err.message,
+    },
   }
 }
 
