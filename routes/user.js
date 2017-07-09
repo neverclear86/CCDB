@@ -11,7 +11,7 @@ var user = require('../mongodb/user');
 
 router.get('/', (req, res, next) => {
   user.auth({
-    name: req.query.name,
+    username: req.query.username,
     password: req.query.password,
   }).then((result) => {
     res.json({
@@ -20,5 +20,38 @@ router.get('/', (req, res, next) => {
   });
 });
 
+
+router.post('/insert/', (req, res, next) => {
+  var data = {
+    username: req.body.username,
+    password: req.body.password,
+  };
+  // 同じユーザ名が存在するかを確認
+  user.find({username:req.body.username})
+  .then((r) => {
+    if (r.length == 0) {
+      // 大丈夫そうなら追加
+      user.insert(data)
+      .then((result) => {
+        res.json({result: result});
+      });
+    } else {
+      res.json({result: false});
+    }
+  }).catch((err) => {
+    res.json({result: false});
+  });
+});
+
+
+router.post('/delete/', (req, res, next) => {
+  var data = {
+    username: req.body.username,
+    password: req.body.password,
+  };
+  user.delete(data).then((result) => {
+    res.json({result: result});
+  });
+});
 
 module.exports = router;

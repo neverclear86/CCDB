@@ -81,4 +81,14 @@ dao.delete = function(filter, collection, user) {
   });
 }
 
+dao.count = function(collection, user) {
+  return new Promise((resolve, reject) => {
+    var url = baseUrl + user;
+    client.connect(url, (err, db) => {
+      var col = db.collection(collection);
+      resolve(col.count());
+    });
+  });
+}
+
 module.exports = dao;

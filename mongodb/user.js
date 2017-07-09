@@ -22,7 +22,6 @@ user.insert = function(data) {
       var col = db.collection('user');
       console.log(data);
       col.insertOne(data, (err, result) => {
-      // col.insertOne(data).then((r) => {
         assert.equal(null, err);
         db.close();
         resolve(result);

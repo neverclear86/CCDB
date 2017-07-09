@@ -11,7 +11,7 @@ var user = require('../mongodb/user');
 
 router.post('/', (req, res, next) => {
   var data = {
-    name: req.body.name,
+    username: req.body.username,
     password: req.body.password,
   };
   user.delete(data).then((result) => {
