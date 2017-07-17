@@ -21,52 +21,34 @@ const validate = require('../util/validate');
  * @param {Object} query      検索条件
  */
 router.get('/find/', (req, res, next) => {
-  var vResult = validate.require(req.query, [
-    'username', 'password', 'collection',
-  ]);
-  if (vResult.length == 0) {
-    var username = req.query.username;
-    var collection = req.query.collection;
-    user.auth({
-      username: username,
-      password: req.query.password,
-    }).then((result) => {
-      // ユーザ認証
-      if (result) {
-        return dao.count(collection, username);
+  var params = req.query;
+  login(params, [])
+  .then((count) => {
+    // コレクションがあるか
+    if (count > 0) {
+      var query = params.query;
+      if (!query) {
+        query = {};
       } else {
-        // 認証失敗
-        throw error.LoginError();
+        query = JSON.parse(query);
       }
-    }).then((count) => {
-      // コレクションがあるか
-      if (count > 0) {
-        var query = req.query.query;
-        if (!query) {
-          query = {};
-        } else {
-          query = JSON.parse(query);
-        }
-        return dao.find(query, collection, username)
-      } else {
-        // コレクションが無い
-        throw error.NoCollectionError(collection);
-      }
-    }).then((result) => {
-      // データがあるか
-      if (result.length) {
-        // 正常
-        res.json(resBuilder.success(result));
-      } else {
-        // データが無い
-        throw error.NoDataError();
-      }
-    }).catch((err) => {
-      res.json(resBuilder.error(err));
-    });
-  } else {
-    res.json(resBuilder.error(error.FewParamsError(vResult)));
-  }
+      return dao.find(query, params.collection, params.username)
+    } else {
+      // コレクションが無い
+      throw error.NoCollectionError(params.collection);
+    }
+  }).then((result) => {
+    // データがあるか
+    if (result.length) {
+      // 正常
+      res.json(resBuilder.success(result));
+    } else {
+      // データが無い
+      throw error.NoDataError();
+    }
+  }).catch((err) => {
+    res.json(resBuilder.error(err));
+  });
 });
 
 
@@ -80,54 +62,41 @@ router.get('/find/', (req, res, next) => {
  * @param {Object} data       挿入するドキュメント
  */
 router.post('/insert/', (req, res, next) => {
-  user.auth({
-    username: req.body.username,
-    password: req.body.password,
+  var params = req.body;
+  login(params, ['data'])
+  .then(() => {
+    var data = JSON.parse(req.body.data);
+    if (!(data instanceof Array)) {
+      data = [data];
+    }
+    return dao.insert(data, req.body.collection, req.body.username);
   }).then((result) => {
     if (result) {
-      var data = JSON.parse(req.body.data);
-      if (!(data instanceof Array)) {
-        data = [data];
-      }
-      dao.insert(data, req.body.collection, req.body.username)
-      .then((result) => {
-        if (result) {
-          res.json(resBuilder.success(result));
-        } else {
-          throw new Error('What the fuck')
-        }
-      });
+      res.json(resBuilder.success(result));
     } else {
-      // 認証失敗
-      throw error.LoginError();
+      throw new Error('What the fuck')
     }
   }).catch((err) => {
     res.json(resBuilder.error(err));
   });
-});
+})
 
 
 
 
 router.post('/update/', (req, res, next) => {
-  user.auth({
-    username: req.body.username,
-    password: req.body.password,
-  }).then((result) => {
-    if (result) {
-      // try {
-      var selector = JSON.parse(req.body.selector);
-      var data = JSON.parse(req.body.data);
-      dao.update(selector, data, req.body.collection, req.body.username)
-      .then((result) => {
-        res.json(resBuilder.success(result));
-      }).catch((err) => {
-        res.json(resBuilder.error(err));
-      });
+  var params = req.body;
+  login(params, ['selector', 'data'])
+  .then((count) => {
+    if (count > 0) {
+      var selector = JSON.parse(params.selector);
+      var data = JSON.parse(params.data);
+      return dao.update(selector, data, params.collection, params.username);
     } else {
-      // 認証失敗
-      throw error.LoginError();
+      throw error.NoCollectionError(params.collection);
     }
+  }).then((result) => {
+    res.json(resBuilder.success(result));
   }).catch((err) => {
     res.json(resBuilder.error(err));
   });
@@ -156,6 +125,30 @@ router.post('/delete/', (req, res, next) => {
   });
 });
 
+function login(params, required) {
+  return new Promise((resolve, reject) => {
+    required.push('username');
+    required.push('password');
+    required.push('collection');
+    var vResult = validate.required(params, required);
+    if (vResult.length == 0) {
+      resolve(params);
+    } else {
+      reject(error.FewParamsError(vResult));
+    }
+  }).then((params) => {
+    return user.auth({
+      username: params.username,
+      password: params.password
+    });
+  }).then((result) => {
+    if (result) {
+      return dao.count(params.collection, params.username);
+    } else {
+      throw error.LoginError();
+    }
+  });
+}
 
 
 module.exports = router;
