@@ -15,10 +15,6 @@ const validate = require('../util/validate');
  * 検索する
  * /api/db/find/
  * GET
- * @param {String} username   ユーザ名
- * @param {String} password   パスワード
- * @param {String} collection コレクション名
- * @param {Object} query      検索条件
  */
 router.get('/find/', (req, res, next) => {
   var params = req.query;
@@ -56,10 +52,6 @@ router.get('/find/', (req, res, next) => {
  * 挿入する
  * /api/db/insert/
  * POST
- * @param {String} username   ユーザ名
- * @param {String} password   パスワード
- * @param {String} collection コレクション名
- * @param {Object} data       挿入するドキュメント
  */
 router.post('/insert/', (req, res, next) => {
   var params = req.body;
@@ -81,17 +73,48 @@ router.post('/insert/', (req, res, next) => {
   });
 })
 
-
-
-
+/**
+ * 変更する
+ * /api/db/update/
+ * POST
+ */
 router.post('/update/', (req, res, next) => {
+  console.log(req.url.split('/')[2]);
   var params = req.body;
   login(params, ['selector', 'data'])
   .then((count) => {
     if (count > 0) {
       var selector = JSON.parse(params.selector);
       var data = JSON.parse(params.data);
-      return dao.update(selector, data, params.collection, params.username);
+      return dao.update(
+        selector,
+        data,
+        params.collection,
+        params.username,
+        {upsert: params.upsert == 'true', one: params.one == 'true'}
+      );
+    } else {
+      throw error.NoCollectionError(params.collection);
+    }
+  }).then((result) => {
+    res.json(resBuilder.success(result));
+  }).catch((err) => {
+    res.json(resBuilder.error(err));
+  });
+});
+
+/**
+ * 削除する
+ * /api/db/delete/
+ * POST
+ */
+router.post('/delete/', (req, res, next) => {
+  var params = req.body;
+  login(params, ['filter'])
+  .then(function(count) {
+    if (count > 0) {
+      var filter = JSON.parse(req.body.filter);
+      return dao.delete(filter, req.body.collection, req.body.username);
     } else {
       throw error.NoCollectionError(params.collection);
     }
@@ -103,28 +126,13 @@ router.post('/update/', (req, res, next) => {
 });
 
 
-router.post('/delete/', (req, res, next) => {
-  user.auth({
-    username: req.body.username,
-    password: req.body.password,
-  }).then((result) => {
-    if (result) {
-      var filter = JSON.parse(req.body.filter);
-      dao.delete(filter, req.body.collection, req.body.username)
-      .then((result) => {
-          res.json(resBuilder.success(result));
-      }).catch((err) => {
-        res.json(resBuilder.error(err));
-      });
-    } else {
-      // 認証失敗
-      throw error.LoginError();
-    }
-  }).catch((err) => {
-    res.json(resBuilder.error(err));
-  });
-});
-
+/**
+ * DB操作前処理
+ * @param  {Object.<string>} params   リクエストボディ
+ * @param  {Array.<string>}  required 必須リクエストパラメータ名
+ *                                    (username,password,collectionを除く)
+ * @return {Promise}  指定したCollectionのデータ件数
+ */
 function login(params, required) {
   return new Promise((resolve, reject) => {
     required.push('username');
