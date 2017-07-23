@@ -6,7 +6,9 @@ CompureCraftから扱えるデータベースとそのためのAPIだよ
   - Node.js
     - express
 - MongoDB
-- CCLua (Lua5.1相当)
 
-## 使い方
-完成したら書くわ
+## How to use
+1. ユーザ管理
+  - ユーザ作成
+  - ユーザ削除
+  - 

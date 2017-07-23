@@ -47,6 +47,19 @@ user.auth = function(data) {
   });
 }
 
+
+user.updatePassword = function(username, newPassword) {
+  return new Promise((resolve, reject) => {
+    client.connect(url, (err, db) => {
+      var col = db.collection('user');
+      resolve(col.updateOne({username: username}, {$set: {password: newPassword}}));
+    });
+  }).then((ret) => {
+    db.close();
+    return ret;
+  });
+}
+
 /**
  * ユーザを削除する
  * @param  {Object} data 削除するユーザのデータ（パスワードあり)
