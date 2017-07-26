@@ -8,6 +8,9 @@
 var express = require('express');
 var router = express.Router();
 var user = require('../mongodb/user');
+const resBuilder = require('../util/responseBuilder');
+const error = require('../util/error');
+const validate = require('../util/validate');
 
 router.get('/', (req, res, next) => {
   user.auth({
@@ -47,9 +50,9 @@ router.post('/insert/', (req, res, next) => {
 router.post('/update/', (req, res, next) => {
   new Promise((resolve, reject) => {
     var params = req.body;
-    var vResult = validate.required(params, {
+    var vResult = validate.required(params, [
       'username', 'password', 'newPassword'
-    });
+    ]);
     if (vResult.length == 0) {
       resolve(params);
     } else {
@@ -67,7 +70,9 @@ router.post('/update/', (req, res, next) => {
       throw error.LoginError();
     }
   }).then((resutl) => {
-    
+    res.json(resBuilder.success(result));
+  }).catch((err) => {
+    res.json(resBuilder.error(err));
   });
 });
 
