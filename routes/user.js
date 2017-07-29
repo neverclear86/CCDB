@@ -25,25 +25,37 @@ router.get('/', (req, res, next) => {
 
 
 router.post('/insert/', (req, res, next) => {
-  var data = {
-    username: req.body.username,
-    password: req.body.password,
-  };
-  console.log(req.body);
-  // 同じユーザ名が存在するかを確認
-  user.find({username:req.body.username})
-  .then((r) => {
+  // var data = {
+  //   username: req.body.username,
+  //   password: req.body.password,
+  // };
+  new Promise((resolve, reject) => {
+    console.log(req.body);
+    console.log(req.headers);
+    var params = req.body;
+    var vResult = validate.required(params, [
+      'username', 'password',
+    ]);
+    if (vResult.length == 0) {
+      resolve(params);
+    } else {
+      reject(error.FewParamsError(vResult));
+    }
+  }).then((params) => {
+    // 同じユーザ名が存在するかを確認
+    return user.find({username:req.body.username});
+  }).then((r) => {
     if (r.length == 0) {
       // 大丈夫そうなら追加
       user.insert(data)
       .then((result) => {
-        res.json({result: result});
+        res.json(resBuilder.success(result));
       });
     } else {
       res.json({result: false});
     }
   }).catch((err) => {
-    res.json({result: false});
+    res.json(resBuilder.error(err));
   });
 });
 
