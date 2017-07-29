@@ -25,10 +25,6 @@ router.get('/', (req, res, next) => {
 
 
 router.post('/insert/', (req, res, next) => {
-  // var data = {
-  //   username: req.body.username,
-  //   password: req.body.password,
-  // };
   new Promise((resolve, reject) => {
     console.log(req.body);
     console.log(req.headers);
@@ -47,7 +43,10 @@ router.post('/insert/', (req, res, next) => {
   }).then((r) => {
     if (r.length == 0) {
       // 大丈夫そうなら追加
-      user.insert(data)
+      return user.insert({
+        username: params.username,
+        password: params.password,
+      });
       .then((result) => {
         res.json(resBuilder.success(result));
       });
