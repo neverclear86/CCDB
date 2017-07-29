@@ -29,6 +29,7 @@ router.post('/insert/', (req, res, next) => {
     username: req.body.username,
     password: req.body.password,
   };
+  console.log(req.body);
   // 同じユーザ名が存在するかを確認
   user.find({username:req.body.username})
   .then((r) => {
