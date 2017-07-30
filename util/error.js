@@ -24,4 +24,8 @@ err.NoCollectionError = function(collection) {
   return err("NoCollectionError", "Nothing Collection : " + collection);
 }
 
+err.InvalidUsernameError = function() {
+  return err("InvalidUsernameError", "Your username is invalid.");
+}
+
 module.exports = err;

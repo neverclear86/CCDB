@@ -26,7 +26,7 @@ router.get('/', (req, res, next) => {
 
 router.post('/insert/', (req, res, next) => {
   new Promise((resolve, reject) => {
-    console.log(req.body);
+    console.log(req.query);
     console.log(req.headers);
     var params = req.body;
     var vResult = validate.required(params, [
@@ -47,12 +47,11 @@ router.post('/insert/', (req, res, next) => {
         username: params.username,
         password: params.password,
       });
-      .then((result) => {
-        res.json(resBuilder.success(result));
-      });
     } else {
-      res.json({result: false});
+      throw error.InvalidUsernameError();
     }
+  }).then((result) => {
+    res.json(resBuilder.success(result));
   }).catch((err) => {
     res.json(resBuilder.error(err));
   });
