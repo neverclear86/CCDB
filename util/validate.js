@@ -1,8 +1,8 @@
 var validate = {};
 
-validate.required = function(req, params) {
-  return params.filter((ele) => {
-    return (!req.hasOwnProperty(ele));
+validate.required = function(params, required) {
+  return required.filter((ele) => {
+    return (!params[ele]);
   });
 }
 

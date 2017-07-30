@@ -25,21 +25,20 @@ router.get('/', (req, res, next) => {
 
 
 router.post('/insert/', (req, res, next) => {
+  console.log(req.body);
+  var params = req.body;
   new Promise((resolve, reject) => {
-    console.log(req.query);
-    console.log(req.headers);
-    var params = req.body;
     var vResult = validate.required(params, [
       'username', 'password',
     ]);
     if (vResult.length == 0) {
-      resolve(params);
+      resolve();
     } else {
       reject(error.FewParamsError(vResult));
     }
-  }).then((params) => {
+  }).then(() => {
     // 同じユーザ名が存在するかを確認
-    return user.find({username:req.body.username});
+    return user.find({username:params.username});
   }).then((r) => {
     if (r.length == 0) {
       // 大丈夫そうなら追加
@@ -59,8 +58,8 @@ router.post('/insert/', (req, res, next) => {
 
 
 router.post('/update/', (req, res, next) => {
+  var params = req.body;
   new Promise((resolve, reject) => {
-    var params = req.body;
     var vResult = validate.required(params, [
       'username', 'password', 'newPassword'
     ]);
@@ -89,12 +88,24 @@ router.post('/update/', (req, res, next) => {
 
 
 router.post('/delete/', (req, res, next) => {
-  var data = {
-    username: req.body.username,
-    password: req.body.password,
-  };
-  user.delete(data).then((result) => {
-    res.json({result: result});
+  var params = req.body
+  Promise.resolve()
+  .then(() => {
+    var vResult = validate.required(params, [
+      'username', 'password', 'newPassword'
+    ]);
+    if (vResult.length != 0) {
+      throw error.FewParamsError(vResult);
+    }
+  }).then(() => {
+    return user.delete({
+      username: params.username,
+      password: params.password,
+    });
+  }).then((result) => {
+    res.json(resBuilder.success(result));
+  }).catch((err) => {
+    res.json(resBuilder.error(err));
   });
 });
 
