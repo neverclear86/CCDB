@@ -35,13 +35,13 @@ router.get('/find/', (req, res, next) => {
     }
   }).then((result) => {
     // データがあるか
-    if (result.length) {
+    // if (result.length) {
       // 正常
       res.json(resBuilder.success(result));
-    } else {
+    // } else {
       // データが無い
-      throw error.NoDataError();
-    }
+      // throw error.NoDataError();
+    // }
   }).catch((err) => {
     res.json(resBuilder.error(err));
   });
