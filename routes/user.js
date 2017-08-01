@@ -13,12 +13,11 @@ const error = require('../util/error');
 const validate = require('../util/validate');
 
 router.get('/', (req, res, next) => {
-  console.log(typeof req.query.password);
-  user.auth(req.query.username,req.query.password)
+  user.auth(req.query.username, req.query.password)
   .then((result) => {
-    res.json({
-      result: result,
-    });
+    res.json(resBuilder.success(result));
+  }).catch((err) => {
+    res.json(resBuilder.error(err));
   });
 });
 
@@ -29,7 +28,6 @@ router.post('/insert/', (req, res, next) => {
     var vResult = validate.required(params, [
       'username', 'password',
     ]);
-    console.log(validateParam(params));
     if (vResult.length == 0) {
       resolve();
     } else {
@@ -37,14 +35,11 @@ router.post('/insert/', (req, res, next) => {
     }
   }).then(() => {
     // 同じユーザ名が存在するかを確認
-    return user.find({username:params.username});
+    return user.find(params.username);
   }).then((r) => {
     if (r.length == 0) {
       // 大丈夫そうなら追加
-      return user.insert({
-        username: params.username,
-        password: params.password,
-      });
+      return user.insert(params.username, params.password);
     } else {
       throw error.InvalidUsernameError();
     }
@@ -68,10 +63,7 @@ router.post('/update/', (req, res, next) => {
       reject(error.FewParamsError(vResult));
     }
   }).then((params) => {
-    return user.auth({
-      username: params.username,
-      password: params.password
-    });
+    return user.auth(params.username, params.password);
   }).then((result) => {
     if (result) {
       return user.updatePassword(params.username, params.newPassword);
@@ -97,10 +89,7 @@ router.post('/delete/', (req, res, next) => {
       throw error.FewParamsError(vResult);
     }
   }).then(() => {
-    return user.delete({
-      username: params.username,
-      password: params.password,
-    });
+    return user.delete(params.username, params.password);
   }).then((result) => {
     res.json(resBuilder.success(result));
   }).catch((err) => {

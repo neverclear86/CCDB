@@ -28,4 +28,8 @@ err.InvalidUsernameError = function() {
   return err("InvalidUsernameError", "Your username is invalid.");
 }
 
+err.InvalidParamsError = function() {
+  return err("InvalidParamsError", "Parameter is invalid");
+}
+
 module.exports = err;

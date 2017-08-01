@@ -5,6 +5,8 @@
 
 const client = require('mongodb').MongoClient;
 const assert = require('assert');
+const hash   = require('./password');
+const error  = require('../util/error');
 
 var url = "mongodb://localhost:27017/"
 
@@ -16,16 +18,19 @@ var user = {};
  * @param  {Object} data ユーザ情報 ({name:ユーザ名, password:パスワード})
  * @return {Promise}
  */
-user.insert = function(data) {
-  return new Promise((resolve, reject) => {
-    client.connect(url, (err, db) => {
-      var col = db.collection('user');
-      col.insertOne(data, (err, result) => {
-        assert.equal(null, err);
-        db.close();
-        resolve(result);
-      });
+user.insert = function(username, password) {
+  var db;
+  return connectUser(username, password)
+  .then((d) => {
+    db = d;
+    var col = db.collection('user');
+    col.insertOne({
+      username: username,
+      password: hash.createHash(password),
     });
+  }).then((result) => {
+    db.close();
+    return result;
   });
 }
 
@@ -35,15 +40,12 @@ user.insert = function(data) {
  * @return {Promise}
  */
 user.auth = function(username, password) {
-  return Promise.resolve(() => {
-    if (isString(username) && isString(password)) {
-      return client.connect(url);
-    } else {
-      throw false;
-    }
-  }).then((db) => {
+  var db;
+  return connectUser(username, password)
+  .then((d) => {
+    db = d;
     var col = db.collection('user');
-    col.find({
+    return col.find({
       username: username,
       password: password,
     }).toArray();
@@ -55,11 +57,12 @@ user.auth = function(username, password) {
 
 
 user.updatePassword = function(username, newPassword) {
-  return new Promise((resolve, reject) => {
-    client.connect(url, (err, db) => {
-      var col = db.collection('user');
-      resolve(col.updateOne({username: username}, {$set: {password: newPassword}}));
-    });
+  var db;
+  return connectUser(username, password)
+  .then((d) => {
+    db = d;
+    var col = db.collection('user');
+    return col.updateOne({username: username}, {$set: {password: newPassword}});
   }).then((ret) => {
     db.close();
     return ret;
@@ -71,15 +74,19 @@ user.updatePassword = function(username, newPassword) {
  * @param  {Object} data 削除するユーザのデータ（パスワードあり)
  * @return {Promise}
  */
-user.delete = function(data) {
-  return new Promise((resolve, reject) => {
-    client.connect(url, (err, db) => {
-      var col = db.collection('user');
-      col.deleteOne(data).then((ret) => {
-        db.close();
-        resolve(ret);
-      });
+user.delete = function(username, password) {
+  var db;
+  return connectUser(username, password)
+  .then((d) => {
+    db = d;
+    var col = db.collection('user');
+    return col.deleteOne({
+      username: username,
+      password: password,
     });
+  }).then((ret) => {
+    db.close();
+    return ret;
   });
 }
 
@@ -88,21 +95,43 @@ user.delete = function(data) {
  * @param  {Object} filter 検索条件
  * @return {Promise}
  */
-user.find = function(filter) {
-  return new Promise((resolve, reject) =>{
-    client.connect(url, (err, db) => {
-      var col = db.collection('user');
-      col.find(filter).toArray((err, items) => {
-        resolve(items);
-        db.close();
+user.find = function(username) {
+  var db;
+  return new Promise((resolve, reject) => {
+    if (isString(username)) {
+      client.connect(url, (err, d) => {
+        if (err) reject(err);
+        db = d;
+        resolve();
       });
-    });
+    } else {
+      reject(error.InvalidParamsError());
+    }
+  }).then(() => {
+    var col = db.collection('user');
+    return col.find({username: username}).toArray();
+  }).then((items) => {
+    db.close();
+    return items;
   });
 }
 
 //==================================
 function isString(arg) {
-  return arg instanceof String
+  return typeof arg == "string";
+}
+
+function connectUser(username, password) {
+  return new Promise((resolve, reject) => {
+    if (isString(username) && isString(password)) {
+      client.connect(url, (err, db) => {
+        if (err) reject(err);
+        resolve(db);
+      });
+    } else {
+      reject(error.InvalidParamsError());
+    }
+  });
 }
 
 
