@@ -13,10 +13,9 @@ const error = require('../util/error');
 const validate = require('../util/validate');
 
 router.get('/', (req, res, next) => {
-  user.auth({
-    username: req.query.username,
-    password: req.query.password,
-  }).then((result) => {
+  console.log(typeof req.query.password);
+  user.auth(req.query.username,req.query.password)
+  .then((result) => {
     res.json({
       result: result,
     });
@@ -25,12 +24,12 @@ router.get('/', (req, res, next) => {
 
 
 router.post('/insert/', (req, res, next) => {
-  console.log(req.body);
   var params = req.body;
   new Promise((resolve, reject) => {
     var vResult = validate.required(params, [
       'username', 'password',
     ]);
+    console.log(validateParam(params));
     if (vResult.length == 0) {
       resolve();
     } else {
@@ -108,5 +107,11 @@ router.post('/delete/', (req, res, next) => {
     res.json(resBuilder.error(err));
   });
 });
+
+
+function validateParam(params) {
+  var ret = validate.str([params.username, params.password], [/^\w*$/, /^\w*$/]);
+  return ret.indexOf(false) < 0;
+}
 
 module.exports = router;

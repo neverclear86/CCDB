@@ -34,15 +34,22 @@ user.insert = function(data) {
  * @param  {Object} data  認証するユーザデータ
  * @return {Promise}
  */
-user.auth = function(data) {
-  return new Promise((resolve, reject) => {
-    client.connect(url, (err, db) => {
-      var col = db.collection('user');
-      col.find(data).toArray((err, items) => {
-        db.close();
-        resolve(items.length == 1);
-      });
-    });
+user.auth = function(username, password) {
+  return Promise.resolve(() => {
+    if (isString(username) && isString(password)) {
+      return client.connect(url);
+    } else {
+      throw false;
+    }
+  }).then((db) => {
+    var col = db.collection('user');
+    col.find({
+      username: username,
+      password: password,
+    }).toArray();
+  }).then((items) => {
+    db.close();
+    return items.length == 1;
   });
 }
 
@@ -94,5 +101,9 @@ user.find = function(filter) {
 }
 
 //==================================
+function isString(arg) {
+  return arg instanceof String
+}
+
 
 module.exports = user;
