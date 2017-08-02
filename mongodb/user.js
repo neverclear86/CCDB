@@ -39,21 +39,10 @@ user.insert = function(username, password) {
  * @param  {Object} data  認証するユーザデータ
  * @return {Promise}
  */
-user.auth = function(username, password) {
-  var db;
-  return connectUser(username, password)
-  .then((d) => {
-    db = d;
-    var col = db.collection('user');
-    return col.find({
-      username: username,
-      password: password,
-    }).toArray();
-  }).then((items) => {
-    db.close();
-    return items.length == 1;
-  });
-}
+user.auth = function(username, password) { var db; return connectUser(username,
+password) .then((d) => { db = d; var col = db.collection('user'); return
+col.find({ username: username, password: hash.createHash(password),
+}).toArray(); }).then((items) => { db.close(); return items.length == 1; }); }
 
 
 user.updatePassword = function(username, newPassword) {
