@@ -17,6 +17,7 @@ router.get('/', (req, res, next) => {
   .then((result) => {
     res.json(resBuilder.success(result));
   }).catch((err) => {
+    console.log(err);
     res.json(resBuilder.error(err));
   });
 });

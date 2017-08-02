@@ -20,10 +20,8 @@ var user = {};
  */
 user.insert = function(username, password) {
   var db;
-  return connectUser(username, password)
-  .then((d) => {
+  return connectUser(username, password, (d, col) => {
     db = d;
-    var col = db.collection('user');
     col.insertOne({
       username: username,
       password: hash.createHash(password),
@@ -39,19 +37,26 @@ user.insert = function(username, password) {
  * @param  {Object} data  認証するユーザデータ
  * @return {Promise}
  */
-user.auth = function(username, password) { var db; return connectUser(username,
-password) .then((d) => { db = d; var col = db.collection('user'); return
-col.find({ username: username, password: hash.createHash(password),
-}).toArray(); }).then((items) => { db.close(); return items.length == 1; }); }
+user.auth = function(username, password) {
+  var db;
+  return connectUser(username, password, (d, col) => {
+    db = d;
+    return col.find({
+      username: username,
+      password: hash.createHash(password),
+    }).toArray();
+  }).then((items) => {
+    db.close();
+    return items.length == 1;
+  })
+}
 
 
 user.updatePassword = function(username, newPassword) {
   var db;
-  return connectUser(username, password)
-  .then((d) => {
+  return connectUser(username, password, (d, col) => {
     db = d;
-    var col = db.collection('user');
-    return col.updateOne({username: username}, {$set: {password: newPassword}});
+    return col.updateOne({username: username}, {$set: {password: hash.createHash(newPassword)}});
   }).then((ret) => {
     db.close();
     return ret;
@@ -65,13 +70,11 @@ user.updatePassword = function(username, newPassword) {
  */
 user.delete = function(username, password) {
   var db;
-  return connectUser(username, password)
-  .then((d) => {
+  return connectUser(username, password, (d, col) => {
     db = d;
-    var col = db.collection('user');
     return col.deleteOne({
       username: username,
-      password: password,
+      password: hash.createHash(password),
     });
   }).then((ret) => {
     db.close();
@@ -110,7 +113,7 @@ function isString(arg) {
   return typeof arg == "string";
 }
 
-function connectUser(username, password) {
+function connectUser(username, password, callback) {
   return new Promise((resolve, reject) => {
     if (isString(username) && isString(password)) {
       client.connect(url, (err, db) => {
@@ -120,6 +123,9 @@ function connectUser(username, password) {
     } else {
       reject(error.InvalidParamsError());
     }
+  }).then((db) => {
+    var col = db.collection('user');
+    return callback(db, col);
   });
 }
 
