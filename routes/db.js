@@ -43,6 +43,7 @@ router.get('/find/', (req, res, next) => {
       // throw error.NoDataError();
     // }
   }).catch((err) => {
+    console.log(err);
     res.json(resBuilder.error(err));
   });
 });
@@ -55,13 +56,14 @@ router.get('/find/', (req, res, next) => {
  */
 router.post('/insert/', (req, res, next) => {
   var params = req.body;
+  console.log(params)
   login(params, ['data'])
   .then(() => {
-    var data = JSON.parse(req.body.data);
+    var data = JSON.parse(params.data);
     if (!(data instanceof Array)) {
       data = [data];
     }
-    return dao.insert(data, req.body.collection, req.body.username);
+    return dao.insert(data, params.collection, params.username);
   }).then((result) => {
     if (result) {
       res.json(resBuilder.success(result));
@@ -69,6 +71,7 @@ router.post('/insert/', (req, res, next) => {
       throw new Error('What the fuck')
     }
   }).catch((err) => {
+    console.log(err);
     res.json(resBuilder.error(err));
   });
 })
@@ -145,10 +148,7 @@ function login(params, required) {
       reject(error.FewParamsError(vResult));
     }
   }).then((params) => {
-    return user.auth({
-      username: params.username,
-      password: params.password
-    });
+    return user.auth(params.username, params.password);
   }).then((result) => {
     if (result) {
       return dao.count(params.collection, params.username);
