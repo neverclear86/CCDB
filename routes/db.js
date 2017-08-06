@@ -34,16 +34,8 @@ router.get('/find/', (req, res, next) => {
       throw error.NoCollectionError(params.collection);
     }
   }).then((result) => {
-    // データがあるか
-    // if (result.length) {
-      // 正常
-      res.json(resBuilder.success(result));
-    // } else {
-      // データが無い
-      // throw error.NoDataError();
-    // }
+    res.json(resBuilder.success(result));
   }).catch((err) => {
-    console.log(err);
     res.json(resBuilder.error(err));
   });
 });
@@ -71,7 +63,6 @@ router.post('/insert/', (req, res, next) => {
       throw new Error('What the fuck')
     }
   }).catch((err) => {
-    console.log(err);
     res.json(resBuilder.error(err));
   });
 })

@@ -15,7 +15,8 @@ var user = {};
 
 /**
  * ユーザを作成する
- * @param  {Object} data ユーザ情報 ({name:ユーザ名, password:パスワード})
+ * @param  {string} username ユーザ名
+ * @param  {string} password パスワード
  * @return {Promise}
  */
 user.insert = function(username, password) {
@@ -34,7 +35,8 @@ user.insert = function(username, password) {
 
 /**
  * ユーザを認証する
- * @param  {Object} data  認証するユーザデータ
+ * @param  {string} username ユーザ名
+ * @param  {string} password パスワード
  * @return {Promise}
  */
 user.auth = function(username, password) {
@@ -51,7 +53,12 @@ user.auth = function(username, password) {
   })
 }
 
-
+/**
+ * パスワード更新
+ * @param  {string} username    ユーザ名
+ * @param  {string} newPassword 新しいパスワード
+ * @return {Promise}
+ */
 user.updatePassword = function(username, newPassword) {
   var db;
   return connectUser(username, password, (d, col) => {
@@ -65,7 +72,8 @@ user.updatePassword = function(username, newPassword) {
 
 /**
  * ユーザを削除する
- * @param  {Object} data 削除するユーザのデータ（パスワードあり)
+ * @param  {string} username ユーザ名
+ * @param  {string} password パスワード
  * @return {Promise}
  */
 user.delete = function(username, password) {
@@ -84,7 +92,7 @@ user.delete = function(username, password) {
 
 /**
  * ユーザを検索
- * @param  {Object} filter 検索条件
+ * @param  {string} username ユーザ名
  * @return {Promise}
  */
 user.find = function(username) {
@@ -109,10 +117,23 @@ user.find = function(username) {
 }
 
 //==================================
+/**
+ * string型かどうか
+ * @param  {Object}  arg 判定する値
+ * @return {Boolean}     Stringかどうか
+ */
 function isString(arg) {
   return typeof arg == "string";
 }
 
+
+/**
+ * ユーザへ接続
+ * @param  {string}   username ユーザ名
+ * @param  {string}   password パスワード
+ * @param  {Function} callback 接続後の処理
+ * @return {Promise}           
+ */
 function connectUser(username, password, callback) {
   return new Promise((resolve, reject) => {
     if (isString(username) && isString(password)) {
