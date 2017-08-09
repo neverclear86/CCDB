@@ -41,7 +41,7 @@ dao.insert = function(data, collection, user) {
  * @param  {string} user       ユーザ名
  * @return {Promise}           検索結果を返却
  */
-dao.find = function(query, collection, user) {
+dao.find = function(query, collection, user, options) {
   return new Promise((resolve, reject) => {
     var url = baseUrl + user;
     client.connect(url, (err, db) => {
