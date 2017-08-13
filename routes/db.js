@@ -22,13 +22,9 @@ router.get('/find/', (req, res, next) => {
   .then((count) => {
     // コレクションがあるか
     if (count > 0) {
-      var query = params.query;
-      if (!query) {
-        query = {};
-      } else {
-        query = JSON.parse(query);
-      }
-      return dao.find(query, params.collection, params.username)
+      var query = parseJSON(params.query, {});
+      var sort = parseJSON(params.sort, {});
+      return dao.find(query, params.collection, params.username, sort);
     } else {
       // コレクションが無い
       throw error.NoCollectionError(params.collection);
@@ -85,7 +81,10 @@ router.post('/update/', (req, res, next) => {
         data,
         params.collection,
         params.username,
-        {upsert: params.upsert == 'true', one: params.one == 'true'}
+        {
+          upsert: params.upsert == 'true',
+          one: params.one == 'true'
+        }
       );
     } else {
       throw error.NoCollectionError(params.collection);
@@ -147,6 +146,14 @@ function login(params, required) {
       throw error.LoginError();
     }
   });
+}
+
+function parseJSON(str, initialValue) {
+  try {
+    return JSON.parse(str);
+  } catch(e) {
+    return initialValue;
+  }
 }
 
 
