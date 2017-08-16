@@ -44,7 +44,6 @@ router.get('/find/', (req, res, next) => {
  */
 router.post('/insert/', (req, res, next) => {
   var params = req.body;
-  console.log(params)
   login(params, ['data'])
   .then(() => {
     var data = JSON.parse(params.data);
