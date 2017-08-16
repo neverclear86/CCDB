@@ -22,26 +22,15 @@ router.get('/find/', (req, res, next) => {
   .then((count) => {
     // コレクションがあるか
     if (count > 0) {
-      var query = params.query;
-      if (!query) {
-        query = {};
-      } else {
-        query = JSON.parse(query);
-      }
-      return dao.find(query, params.collection, params.username)
+      var query = parseJSON(params.query, {});
+      var sort = parseJSON(params.sort, {});
+      return dao.find(query, params.collection, params.username, sort);
     } else {
       // コレクションが無い
       throw error.NoCollectionError(params.collection);
     }
   }).then((result) => {
-    // データがあるか
-    // if (result.length) {
-      // 正常
-      res.json(resBuilder.success(result));
-    // } else {
-      // データが無い
-      // throw error.NoDataError();
-    // }
+    res.json(resBuilder.success(result));
   }).catch((err) => {
     res.json(resBuilder.error(err));
   });
@@ -57,11 +46,11 @@ router.post('/insert/', (req, res, next) => {
   var params = req.body;
   login(params, ['data'])
   .then(() => {
-    var data = JSON.parse(req.body.data);
+    var data = JSON.parse(params.data);
     if (!(data instanceof Array)) {
       data = [data];
     }
-    return dao.insert(data, req.body.collection, req.body.username);
+    return dao.insert(data, params.collection, params.username);
   }).then((result) => {
     if (result) {
       res.json(resBuilder.success(result));
@@ -91,7 +80,10 @@ router.post('/update/', (req, res, next) => {
         data,
         params.collection,
         params.username,
-        {upsert: params.upsert == 'true', one: params.one == 'true'}
+        {
+          upsert: params.upsert == 'true',
+          one: params.one == 'true'
+        }
       );
     } else {
       throw error.NoCollectionError(params.collection);
@@ -145,10 +137,7 @@ function login(params, required) {
       reject(error.FewParamsError(vResult));
     }
   }).then((params) => {
-    return user.auth({
-      username: params.username,
-      password: params.password
-    });
+    return user.auth(params.username, params.password);
   }).then((result) => {
     if (result) {
       return dao.count(params.collection, params.username);
@@ -156,6 +145,14 @@ function login(params, required) {
       throw error.LoginError();
     }
   });
+}
+
+function parseJSON(str, initialValue) {
+  try {
+    return JSON.parse(str);
+  } catch(e) {
+    return initialValue;
+  }
 }
 
 
